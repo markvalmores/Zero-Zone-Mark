@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db, auth } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 
@@ -12,6 +12,7 @@ interface User {
 }
 
 interface TimeEntry {
+  id: string;
   userId: string;
   clockIn: any;
   clockOut?: any;
@@ -29,10 +30,18 @@ export default function AdminPanel() {
       setEmployees(usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as User)));
       
       const entriesSnap = await getDocs(collection(db, 'timeEntries'));
-      setEntries(entriesSnap.docs.map(doc => doc.data() as TimeEntry));
+      setEntries(entriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as TimeEntry)));
     };
     fetchData();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this time entry?")) {
+      await deleteDoc(doc(db, 'timeEntries', id));
+      setEntries(entries.filter(e => e.id !== id));
+      alert('Entry deleted!');
+    }
+  };
 
   const exportCSV = () => {
     const csvContent = "data:text/csv;charset=utf-8," + 
@@ -69,15 +78,19 @@ export default function AdminPanel() {
               <th className="pb-2">Date</th>
               <th className="pb-2">Clock In</th>
               <th className="pb-2">Clock Out</th>
+              <th className="pb-2">Actions</th>
             </tr>
           </thead>
           <tbody className="text-zinc-300">
-            {entries.map((entry, i) => (
-              <tr key={i} className="border-b border-zinc-800/50">
+            {entries.map((entry) => (
+              <tr key={entry.id} className="border-b border-zinc-800/50">
                 <td className="py-2">{employees.find(u => u.id === entry.userId)?.name}</td>
                 <td className="py-2">{entry.date}</td>
                 <td className="py-2">{entry.clockIn?.toDate().toLocaleTimeString()}</td>
                 <td className="py-2">{entry.clockOut ? entry.clockOut.toDate().toLocaleTimeString() : 'N/A'}</td>
+                <td className="py-2">
+                  <button onClick={() => handleDelete(entry.id)} className="text-red-400 hover:text-red-300">Delete</button>
+                </td>
               </tr>
             ))}
           </tbody>
