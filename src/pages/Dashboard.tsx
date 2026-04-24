@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activeEntry, setActiveEntry] = useState<TimeEntry | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,18 +52,32 @@ export default function Dashboard() {
     };
     fetchActive();
     
-    // Timer
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    // Timer to update display
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+      if (activeEntry) {
+        const start = activeEntry.clockIn.toDate ? activeEntry.clockIn.toDate() : new Date(activeEntry.clockIn);
+        setElapsedTime(Math.floor((Date.now() - start.getTime()) / 1000));
+      }
+    }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeEntry]);
+
+  const formatTime = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleClockIn = async () => {
     if (!auth.currentUser) return;
-    const entry = await addDoc(collection(db, 'timeEntries'), {
+    const entryData = {
       userId: auth.currentUser.uid,
       clockIn: serverTimestamp(),
       date: new Date().toISOString().split('T')[0]
-    });
+    };
+    const entry = await addDoc(collection(db, 'timeEntries'), entryData);
     setActiveEntry({ id: entry.id, clockIn: new Date() });
     alert('Clocked In!');
   };
@@ -73,6 +88,7 @@ export default function Dashboard() {
       clockOut: serverTimestamp()
     });
     setActiveEntry(null);
+    setElapsedTime(0);
     alert('Clocked Out!');
   };
 
@@ -91,6 +107,13 @@ export default function Dashboard() {
       <div className="bg-[#18181b] border border-[#27272a] rounded-3xl p-8 max-w-2xl">
         <h1 className="text-4xl font-bold mb-4">{currentTime.toLocaleTimeString()}</h1>
         <p className="text-zinc-400 mb-8">{currentTime.toDateString()}</p>
+        
+        {activeEntry && (
+            <div className="mb-6">
+                <p className="text-sm text-zinc-400">Time Worked:</p>
+                <p className="text-3xl font-mono text-emerald-400">{formatTime(elapsedTime)}</p>
+            </div>
+        )}
         
         <div className="flex gap-4">
           <button 
