@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "worker"] },
+        "createdAt": { "type": "string" },
+        "notificationEmail": { "type": "string" }
+      },
+      "required": ["name", "email", "role", "createdAt"]
+    },
+    "TimeEntry": {
+      "title": "TimeEntry",
+      "description": "Clock-in/out records",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "clockIn": { "type": "string" },
+        "clockOut": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["userId", "clockIn", "date"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/timeEntries/{entryId}": {
+      "schema": "TimeEntry",
+      "description": "Clock records"
+    }
+  }
+}
