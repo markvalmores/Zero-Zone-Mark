@@ -46,7 +46,7 @@ export default function AdminPanel() {
   const exportCSV = () => {
     const csvContent = "data:text/csv;charset=utf-8," + 
       ["Name,Email,Date,ClockIn,ClockOut"].concat(
-        entries.map(e => `${employees.find(u => u.id === e.userId)?.name},${employees.find(u => u.id === e.userId)?.email},${e.date},${e.clockIn.toDate().toLocaleTimeString()},${e.clockOut ? e.clockOut.toDate().toLocaleTimeString() : 'N/A'}`)
+        entries.map(e => `${employees.find(u => u.id === e.userId)?.name},${employees.find(u => u.id === e.userId)?.email},${e.date},${e.clockIn.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' })},${e.clockOut ? e.clockOut.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' }) : 'N/A'}`)
       ).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -86,8 +86,8 @@ export default function AdminPanel() {
               <tr key={entry.id} className="border-b border-zinc-800/50">
                 <td className="py-2">{employees.find(u => u.id === entry.userId)?.name}</td>
                 <td className="py-2">{entry.date}</td>
-                <td className="py-2">{entry.clockIn?.toDate().toLocaleTimeString()}</td>
-                <td className="py-2">{entry.clockOut ? entry.clockOut.toDate().toLocaleTimeString() : 'N/A'}</td>
+                <td className="py-2">{entry.clockIn?.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' })}</td>
+                <td className="py-2">{entry.clockOut ? entry.clockOut.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' }) : 'N/A'}</td>
                 <td className="py-2">
                   <button onClick={() => handleDelete(entry.id)} className="text-red-400 hover:text-red-300">Delete</button>
                 </td>

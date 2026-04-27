@@ -75,7 +75,7 @@ export default function Dashboard() {
     const entryData = {
       userId: auth.currentUser.uid,
       clockIn: serverTimestamp(),
-      date: new Date().toISOString().split('T')[0]
+      date: new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
     };
     const entry = await addDoc(collection(db, 'timeEntries'), entryData);
     setActiveEntry({ id: entry.id, clockIn: new Date() });
@@ -105,8 +105,8 @@ export default function Dashboard() {
       </div>
       
       <div className="bg-[#18181b] border border-[#27272a] rounded-3xl p-8 max-w-2xl">
-        <h1 className="text-4xl font-bold mb-4">{currentTime.toLocaleTimeString()}</h1>
-        <p className="text-zinc-400 mb-8">{currentTime.toDateString()}</p>
+        <h1 className="text-4xl font-bold mb-4">{currentTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' })}</h1>
+        <p className="text-zinc-400 mb-8">{currentTime.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
         
         {activeEntry && (
             <div className="mb-6">
